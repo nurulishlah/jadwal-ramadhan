@@ -1,0 +1,12 @@
+/* Custom styles to supplement Tailwind or scoped overrides */
+.jadwal-wrapper table th {
+    font-weight: 600;
+}
+
+.jadwal-wrapper table td {
+    vertical-align: middle;
+}
+
+.jadwal-tab-btn.active {
+    /* Ensure active state visuals override defaults if needed */
+}
