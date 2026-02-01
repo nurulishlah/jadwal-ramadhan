@@ -15,7 +15,7 @@ function jadwal_ramadhan_get_dashboard_html() {
     $args_today = array(
         'post_type' => 'jadwal_ramadhan',
         'meta_key' => 'tanggal_masehi',
-        'meta_value' => date('Y-m-d'), // Comparison with Y-m-d format stored in DB
+        'meta_value' => current_time('Y-m-d'), // Comparison with Y-m-d format stored in DB
         'posts_per_page' => 1
     );
     // Note: The saved date format in CPT impl was `input type="date"` which saves as Y-m-d.
