@@ -15,11 +15,9 @@ function jadwal_ramadhan_get_dashboard_html() {
     $args_today = array(
         'post_type' => 'jadwal_ramadhan',
         'meta_key' => 'tanggal_masehi',
-        'meta_value' => current_time('Y-m-d'), // Comparison with Y-m-d format stored in DB
+        'meta_value' => current_time('Y-m-d'), 
         'posts_per_page' => 1
     );
-    // Note: The saved date format in CPT impl was `input type="date"` which saves as Y-m-d.
-    // So we should compare with Y-m-d.
     
     $query_today = new WP_Query( $args_today );
     $today_data = false;
@@ -28,13 +26,13 @@ function jadwal_ramadhan_get_dashboard_html() {
         while ( $query_today->have_posts() ) {
             $query_today->the_post();
             $pid = get_the_ID();
+            $kajian_raw = get_post_meta( $pid, 'kajian_data', true );
+            
             $today_data = array(
                 'malam_ke' => get_post_meta( $pid, 'malam_ke', true ),
-                'penceramah_id' => get_post_meta( $pid, 'relasi_tokoh', true ),
                 'imam_tarawih_id' => get_post_meta( $pid, 'relasi_imam_tarawih', true ),
                 'imam_qiyamul_id' => get_post_meta( $pid, 'relasi_imam_qiyamul', true ),
-                'topik' => get_post_meta( $pid, 'topik_kajian', true ),
-                'waktu' => get_post_meta( $pid, 'waktu_kajian', true ),
+                'kajian_list' => is_array($kajian_raw) ? $kajian_raw : array(),
             );
         }
         wp_reset_postdata();
@@ -83,25 +81,7 @@ function jadwal_ramadhan_get_dashboard_html() {
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Penceramah Card -->
-                    <?php if ( $today_data['penceramah_id'] ) : 
-                        $tokoh = get_post( $today_data['penceramah_id'] );
-                        $img = get_the_post_thumbnail_url( $tokoh->ID, 'medium' );
-                        $gelar = get_post_meta( $tokoh->ID, 'gelar', true );
-                    ?>
-                    <div class="bg-emerald-50 rounded-lg p-5 flex flex-col items-center shadow-sm border border-emerald-100">
-                        <div class="w-24 h-24 rounded-full overflow-hidden mb-3 border-4 border-white shadow-md bg-gray-200">
-                            <?php if($img): ?><img src="<?php echo esc_url($img); ?>" alt="<?php echo esc_attr($tokoh->post_title); ?>" class="w-full h-full object-cover"><?php endif; ?>
-                        </div>
-                        <h4 class="font-bold text-lg text-emerald-900 text-center leading-tight"><?php echo esc_html( $tokoh->post_title ); ?></h4>
-                        <p class="text-xs text-emerald-600 font-medium mb-2"><?php echo esc_html( $gelar ); ?></p>
-                        <span class="bg-emerald-200 text-emerald-800 text-xs px-2 py-1 rounded">Penceramah / Kultum</span>
-                        <?php if($today_data['topik']): ?>
-                            <p class="mt-3 text-sm text-gray-600 text-center italic">"<?php echo esc_html($today_data['topik']); ?>"</p>
-                        <?php endif; ?>
-                    </div>
-                    <?php endif; ?>
-
+                    
                     <!-- Imam Tarawih Card -->
                     <?php if ( $today_data['imam_tarawih_id'] ) : 
                          $tokoh = get_post( $today_data['imam_tarawih_id'] );
@@ -133,6 +113,31 @@ function jadwal_ramadhan_get_dashboard_html() {
                         <span class="bg-purple-200 text-purple-800 text-xs px-2 py-1 rounded">Imam Qiyamul Lail</span>
                     </div>
                     <?php endif; ?>
+
+                    <!-- Loop Kajian Cards -->
+                    <?php foreach($today_data['kajian_list'] as $kajian): 
+                        if ( empty($kajian['tokoh_id']) ) continue;
+                        $tokoh = get_post( $kajian['tokoh_id'] );
+                        if (!$tokoh) continue;
+                        
+                        $img = get_the_post_thumbnail_url( $tokoh->ID, 'medium' );
+                        $gelar = get_post_meta( $tokoh->ID, 'gelar', true );
+                        $waktu = $kajian['waktu'] ?: 'Kajian';
+                        $topik = $kajian['topik'];
+                    ?>
+                    <div class="bg-emerald-50 rounded-lg p-5 flex flex-col items-center shadow-sm border border-emerald-100">
+                        <div class="w-24 h-24 rounded-full overflow-hidden mb-3 border-4 border-white shadow-md bg-gray-200">
+                            <?php if($img): ?><img src="<?php echo esc_url($img); ?>" alt="<?php echo esc_attr($tokoh->post_title); ?>" class="w-full h-full object-cover"><?php endif; ?>
+                        </div>
+                        <h4 class="font-bold text-lg text-emerald-900 text-center leading-tight"><?php echo esc_html( $tokoh->post_title ); ?></h4>
+                        <p class="text-xs text-emerald-600 font-medium mb-2"><?php echo esc_html( $gelar ); ?></p>
+                        <span class="bg-emerald-200 text-emerald-800 text-xs px-2 py-1 rounded"><?php echo esc_html($waktu); ?></span>
+                        <?php if($topik): ?>
+                            <p class="mt-3 text-sm text-gray-600 text-center italic">"<?php echo esc_html($topik); ?>"</p>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+
                 </div>
 
             <?php else : ?>
@@ -151,8 +156,8 @@ function jadwal_ramadhan_get_dashboard_html() {
                         <th class="px-4 py-3">Malam Ke</th>
                         <th class="px-4 py-3">Tanggal</th>
                         <th class="px-4 py-3">Imam Tarawih</th>
-                        <th class="px-4 py-3">Penceramah</th>
                         <th class="px-4 py-3">Imam Qiyamul</th>
+                        <th class="px-4 py-3">Agenda Kajian</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -166,18 +171,28 @@ function jadwal_ramadhan_get_dashboard_html() {
                             $imam_tarawih = get_post_meta( $pid, 'relasi_imam_tarawih', true );
                             $imam_tarawih_name = $imam_tarawih ? get_the_title($imam_tarawih) : '-';
 
-                            $penceramah = get_post_meta( $pid, 'relasi_tokoh', true );
-                            $penceramah_name = $penceramah ? get_the_title($penceramah) : '-';
-
                             $imam_qiyamul = get_post_meta( $pid, 'relasi_imam_qiyamul', true );
                             $imam_qiyamul_name = $imam_qiyamul ? get_the_title($imam_qiyamul) : '-';
+
+                            $kajian_raw = get_post_meta( $pid, 'kajian_data', true );
+                            $kajian_display = '-';
+                            if ( is_array($kajian_raw) && !empty($kajian_raw) ) {
+                                $items = [];
+                                foreach($kajian_raw as $k) {
+                                    if(empty($k['tokoh_id'])) continue;
+                                    $t = get_the_title($k['tokoh_id']);
+                                    $w = $k['waktu'];
+                                    $items[] = "<strong>$w</strong>: $t";
+                                }
+                                if(!empty($items)) $kajian_display = implode('<br>', $items);
+                            }
                     ?>
                     <tr class="bg-white border-b hover:bg-gray-50">
                         <td class="px-4 py-3 font-medium text-gray-900 text-center"><?php echo esc_html($malam); ?></td>
                         <td class="px-4 py-3 whitespace-nowrap"><?php echo esc_html(date_i18n('d M Y', strtotime($date))); ?></td>
                         <td class="px-4 py-3"><?php echo esc_html($imam_tarawih_name); ?></td>
-                        <td class="px-4 py-3"><?php echo esc_html($penceramah_name); ?></td>
                         <td class="px-4 py-3"><?php echo esc_html($imam_qiyamul_name); ?></td>
+                        <td class="px-4 py-3"><?php echo $kajian_display; // Allowed html ?></td>
                     </tr>
                     <?php 
                         endwhile; 

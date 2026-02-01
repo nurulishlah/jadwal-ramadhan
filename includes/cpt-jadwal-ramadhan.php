@@ -71,11 +71,14 @@ function jadwal_ramadhan_meta_cb( $post ) {
     
     $tanggal_masehi = get_post_meta( $post->ID, 'tanggal_masehi', true );
     $malam_ke = get_post_meta( $post->ID, 'malam_ke', true );
-    $relasi_tokoh = get_post_meta( $post->ID, 'relasi_tokoh', true ); // Penceramah
     $relasi_imam_tarawih = get_post_meta( $post->ID, 'relasi_imam_tarawih', true );
     $relasi_imam_qiyamul = get_post_meta( $post->ID, 'relasi_imam_qiyamul', true );
-    $topik_kajian = get_post_meta( $post->ID, 'topik_kajian', true );
-    $waktu_kajian = get_post_meta( $post->ID, 'waktu_kajian', true );
+    
+    // Get Repeater Data (Stored as JSON)
+    $kajian_data = get_post_meta( $post->ID, 'kajian_data', true );
+    if ( ! is_array( $kajian_data ) ) {
+        $kajian_data = array();
+    }
 
     // Get List of Tokoh for Dropdowns
     $tokoh_posts = get_posts(array(
@@ -93,15 +96,10 @@ function jadwal_ramadhan_meta_cb( $post ) {
         <label>Malam Ke- (1-30):</label><br>
         <input type="number" name="malam_ke" value="<?php echo esc_attr( $malam_ke ); ?>" class="widefat" min="1" max="30">
     </p>
-    <p>
-        <label>Penceramah (Kultum/Kajian):</label><br>
-        <select name="relasi_tokoh" class="widefat">
-            <option value="">-- Pilih Tokoh --</option>
-            <?php foreach($tokoh_posts as $p): ?>
-                <option value="<?php echo $p->ID; ?>" <?php selected($relasi_tokoh, $p->ID); ?>><?php echo esc_html($p->post_title); ?></option>
-            <?php endforeach; ?>
-        </select>
-    </p>
+    
+    <hr style="margin: 20px 0; border: none; border-bottom: 1px solid #ddd;">
+    <h4 style="margin-bottom: 10px;">Imam Salat</h4>
+    
     <p>
         <label>Imam Tarawih:</label><br>
         <select name="relasi_imam_tarawih" class="widefat">
@@ -120,14 +118,85 @@ function jadwal_ramadhan_meta_cb( $post ) {
             <?php endforeach; ?>
         </select>
     </p>
-    <p>
-        <label>Topik Kajian:</label><br>
-        <input type="text" name="topik_kajian" value="<?php echo esc_attr( $topik_kajian ); ?>" class="widefat">
-    </p>
-    <p>
-        <label>Waktu Kajian:</label><br>
-        <input type="text" name="waktu_kajian" value="<?php echo esc_attr( $waktu_kajian ); ?>" class="widefat" placeholder="Contoh: Ba'da Shubuh">
-    </p>
+
+    <hr style="margin: 20px 0; border: none; border-bottom: 1px solid #ddd;">
+    <h4 style="margin-bottom: 10px;">Daftar Kajian (Kultum, Subuh, dll)</h4>
+
+    <div id="kajian-repeater-container">
+        <?php foreach ( $kajian_data as $index => $row ) : 
+            $t_id = isset( $row['tokoh_id'] ) ? $row['tokoh_id'] : '';
+            $waktu = isset( $row['waktu'] ) ? $row['waktu'] : '';
+            $topik = isset( $row['topik'] ) ? $row['topik'] : '';
+        ?>
+        <div class="kajian-row" style="background: #f9f9f9; padding: 10px; border: 1px solid #ddd; margin-bottom: 10px; border-radius: 4px;">
+            <p style="margin-top: 0;">
+                <label>Waktu Kajian (e.g. Ba'da Shubuh):</label>
+                <input type="text" name="kajian_data[<?php echo $index; ?>][waktu]" value="<?php echo esc_attr( $waktu ); ?>" class="widefat">
+            </p>
+            <p>
+                <label>Penceramah:</label>
+                <select name="kajian_data[<?php echo $index; ?>][tokoh_id]" class="widefat">
+                    <option value="">-- Pilih Tokoh --</option>
+                    <?php foreach($tokoh_posts as $p): ?>
+                        <option value="<?php echo $p->ID; ?>" <?php selected($t_id, $p->ID); ?>><?php echo esc_html($p->post_title); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </p>
+            <p>
+                <label>Topik:</label>
+                <input type="text" name="kajian_data[<?php echo $index; ?>][topik]" value="<?php echo esc_attr( $topik ); ?>" class="widefat">
+            </p>
+            <button type="button" class="button remove-kajian-row" style="color: #a00;">Hapus Kajian ini</button>
+        </div>
+        <?php endforeach; ?>
+    </div>
+
+    <button type="button" class="button button-primary" id="add-kajian-row">Tambah Kajian</button>
+    
+    <!-- Template for JS -->
+    <script type="text/template" id="kajian-row-template">
+        <div class="kajian-row" style="background: #f9f9f9; padding: 10px; border: 1px solid #ddd; margin-bottom: 10px; border-radius: 4px;">
+            <p style="margin-top: 0;">
+                <label>Waktu Kajian (e.g. Ba'da Shubuh):</label>
+                <input type="text" name="kajian_data[{index}][waktu]" value="" class="widefat">
+            </p>
+            <p>
+                <label>Penceramah:</label>
+                <select name="kajian_data[{index}][tokoh_id]" class="widefat">
+                    <option value="">-- Pilih Tokoh --</option>
+                    <?php foreach($tokoh_posts as $p): ?>
+                        <option value="<?php echo $p->ID; ?>"><?php echo esc_html($p->post_title); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </p>
+            <p>
+                <label>Topik:</label>
+                <input type="text" name="kajian_data[{index}][topik]" value="" class="widefat">
+            </p>
+            <button type="button" class="button remove-kajian-row" style="color: #a00;">Hapus Kajian ini</button>
+        </div>
+    </script>
+
+    <script>
+    jQuery(document).ready(function($) {
+        var container = $('#kajian-repeater-container');
+        var template = $('#kajian-row-template').html();
+        
+        $('#add-kajian-row').on('click', function() {
+            var index = container.children().length;
+            var newRow = template.replace(/{index}/g, index);
+            container.append(newRow);
+        });
+
+        container.on('click', '.remove-kajian-row', function() {
+            $(this).closest('.kajian-row').remove();
+            // Re-index logic could be added here if PHP relies on continuous indexes, 
+            // but typical array submission handles non-contiguous fine usually if just iterating.
+            // WP preserves keys. So we might get kajian_data[0], kajian_data[2].
+            // We should strip keys before saving in PHP just to be safe/clean.
+        });
+    });
+    </script>
     <?php
 }
 
@@ -148,11 +217,30 @@ function jadwal_ramadhan_save_meta( $post_id ) {
         return;
     }
 
-    $fields = array('tanggal_masehi', 'malam_ke', 'relasi_tokoh', 'relasi_imam_tarawih', 'relasi_imam_qiyamul', 'topik_kajian', 'waktu_kajian');
+    // Flat fields
+    $fields = array('tanggal_masehi', 'malam_ke', 'relasi_imam_tarawih', 'relasi_imam_qiyamul');
     foreach($fields as $field) {
         if ( isset( $_POST[$field] ) ) {
             update_post_meta( $post_id, $field, sanitize_text_field( $_POST[$field] ) );
         }
+    }
+
+    // Repeater field
+    if ( isset( $_POST['kajian_data'] ) && is_array( $_POST['kajian_data'] ) ) {
+        $clean_kajian = array();
+        foreach ( $_POST['kajian_data'] as $row ) {
+            if ( ! empty( $row['waktu'] ) || ! empty( $row['tokoh_id'] ) || ! empty( $row['topik'] ) ) {
+                $clean_kajian[] = array(
+                    'waktu'    => sanitize_text_field( $row['waktu'] ),
+                    'tokoh_id' => sanitize_text_field( $row['tokoh_id'] ),
+                    'topik'    => sanitize_text_field( $row['topik'] ),
+                );
+            }
+        }
+        // Save as JSON based meta (serialized array is default WP behavior for arrays passed to update_post_meta)
+        update_post_meta( $post_id, 'kajian_data', $clean_kajian );
+    } else {
+        delete_post_meta( $post_id, 'kajian_data' );
     }
 }
 add_action( 'save_post', 'jadwal_ramadhan_save_meta' );

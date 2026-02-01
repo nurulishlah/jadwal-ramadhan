@@ -27,11 +27,11 @@ function jadwal_ramadhan_render_import_page() {
         ?>
 
         <div class="card" style="max-width: 600px; padding: 20px; margin-top: 20px;">
+            <p><strong>UPDATED IMPORT LOGIC:</strong> This will populate the new Repeater Field structure.</p>
             <p>Click the button below to populate the 'Tokoh' and 'Jadwal Ramadhan' based on the provided images.</p>
-            <p><strong>Warning:</strong> This may create duplicate entries if run multiple times (logic checks for existing Titles).</p>
             <form method="post">
                 <?php wp_nonce_field( 'jadwal_import_action', 'jadwal_import_nonce' ); ?>
-                <input type="submit" name="run_import" class="button button-primary" value="Run Import Process">
+                <input type="submit" name="run_import" class="button button-primary" value="Run Import Process (v2)">
             </form>
         </div>
     </div>
@@ -39,7 +39,7 @@ function jadwal_ramadhan_render_import_page() {
 }
 
 function jadwal_ramadhan_run_import_process() {
-    // DATA ARRAYS
+    // List of Tokoh
     $tokoh_list = [
         "Ust. Arif Amiruddin, Al-Hafidz" => ["Gelar" => "Al-Hafidz"],
         "Ust. Deva Abdussalam" => ["Gelar" => ""],
@@ -120,6 +120,7 @@ function jadwal_ramadhan_run_import_process() {
         30 => "Ust. Sadewa Al-Haidiantoro Al- Hafidz",
     ];
 
+    // RAW Kajian Data
     $kajian_schedule = [
         "2026-02-21" => [["Ust. Mahfudz Hidayat", "Ba'da Shubuh", "Kajian Rutin Akhir Pekan-3"], ["Ust. Kyai Dede Supriyatna, S.Ag, M.Pd.I", "Ba'da 'Isya", "Kultum Tarawih"]],
         "2026-02-22" => [["Ust. Dr. Muhyidin Junaidi", "Ba'da Shubuh", "Kajian Rutin Akhir Pekan-3"], ["Ust. Dr. Dadang Holiyullah", "Ba'da 'Isya", "Kultum Tarawih"]],
@@ -207,30 +208,33 @@ function jadwal_ramadhan_run_import_process() {
                 update_post_meta( $pid, 'relasi_imam_qiyamul', $q_id );
             }
 
-            // Kajian
+            // Updated Kajian Logic: REPEATER ARRAY
             if ( isset( $kajian_schedule[$date] ) ) {
                 $entries = $kajian_schedule[$date];
-                $chosen = null;
-                // Prioritize Isya/Tarawih
+                $new_kajian_data = [];
+                
                 foreach($entries as $e) {
-                    if ( strpos($e[1], 'Isya') !== false ) {
-                        $chosen = $e;
-                        break;
-                    }
+                    $penceramah = $e[0];
+                    $waktu = $e[1];
+                    $topik = $e[2] ?? '';
+                    
+                    $p_id = jr_get_tokoh_id_helper( $penceramah, $tokoh_list );
+                    
+                    $new_kajian_data[] = [
+                        'tokoh_id' => $p_id,
+                        'waktu' => $waktu,
+                        'topik' => $topik
+                    ];
                 }
-                if (!$chosen && !empty($entries)) $chosen = $entries[0];
-
-                if ( $chosen ) {
-                    $p_id = jr_get_tokoh_id_helper( $chosen[0], $tokoh_list );
-                    update_post_meta( $pid, 'relasi_tokoh', $p_id );
-                    update_post_meta( $pid, 'waktu_kajian', $chosen[1] );
-                    update_post_meta( $pid, 'topik_kajian', $chosen[2] ?? '' );
+                
+                if (!empty($new_kajian_data)) {
+                    update_post_meta( $pid, 'kajian_data', $new_kajian_data );
                 }
             }
         }
     }
-    $log .= "Jadwal processed.<br>";
+    $log .= "Jadwal processed with Repeater Data.<br>";
 
     // Show Notice
-    echo '<div class="notice notice-success is-dismissible"><p>Import Completed Successfully!<br>' . $log . '</p></div>';
+    echo '<div class="notice notice-success is-dismissible"><p>Import Completed Successfully (v2)!<br>' . $log . '</p></div>';
 }
