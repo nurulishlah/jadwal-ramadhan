@@ -195,6 +195,11 @@ function jadwal_ramadhan_run_import_process() {
         if ( $pid ) {
             update_post_meta( $pid, 'malam_ke', $malam );
             update_post_meta( $pid, 'tanggal_masehi', $date );
+            
+            // Auto-generate Hijri Date
+            // Valid only for this specific Ramadhan context where Malam 1 = 1 Ramadhan
+            $hijri_text = "$malam Ramadhan 1447H";
+            update_post_meta( $pid, 'tanggal_hijriyah', $hijri_text );
 
             // Imam Tarawih
             if ( $imam_name ) {

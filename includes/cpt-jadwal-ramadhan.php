@@ -70,6 +70,7 @@ function jadwal_ramadhan_meta_cb( $post ) {
     wp_nonce_field( 'jadwal_ramadhan_save', 'jadwal_ramadhan_nonce' );
     
     $tanggal_masehi = get_post_meta( $post->ID, 'tanggal_masehi', true );
+    $tanggal_hijriyah = get_post_meta( $post->ID, 'tanggal_hijriyah', true );
     $malam_ke = get_post_meta( $post->ID, 'malam_ke', true );
     $relasi_imam_tarawih = get_post_meta( $post->ID, 'relasi_imam_tarawih', true );
     $relasi_imam_qiyamul = get_post_meta( $post->ID, 'relasi_imam_qiyamul', true );
@@ -91,6 +92,10 @@ function jadwal_ramadhan_meta_cb( $post ) {
     <p>
         <label>Tanggal Masehi:</label><br>
         <input type="date" name="tanggal_masehi" value="<?php echo esc_attr( $tanggal_masehi ); ?>" class="widefat">
+    </p>
+    <p>
+        <label>Tanggal Hijriyah (Text):</label><br>
+        <input type="text" name="tanggal_hijriyah" value="<?php echo esc_attr( $tanggal_hijriyah ); ?>" class="widefat" placeholder="Contoh: 1 Ramadhan 1447H">
     </p>
     <p>
         <label>Malam Ke- (1-30):</label><br>
@@ -218,7 +223,7 @@ function jadwal_ramadhan_save_meta( $post_id ) {
     }
 
     // Flat fields
-    $fields = array('tanggal_masehi', 'malam_ke', 'relasi_imam_tarawih', 'relasi_imam_qiyamul');
+    $fields = array('tanggal_masehi', 'tanggal_hijriyah', 'malam_ke', 'relasi_imam_tarawih', 'relasi_imam_qiyamul');
     foreach($fields as $field) {
         if ( isset( $_POST[$field] ) ) {
             update_post_meta( $post_id, $field, sanitize_text_field( $_POST[$field] ) );

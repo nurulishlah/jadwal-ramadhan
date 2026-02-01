@@ -30,6 +30,7 @@ function jadwal_ramadhan_get_dashboard_html() {
             
             $today_data = array(
                 'malam_ke' => get_post_meta( $pid, 'malam_ke', true ),
+                'tanggal_hijriyah' => get_post_meta( $pid, 'tanggal_hijriyah', true ),
                 'imam_tarawih_id' => get_post_meta( $pid, 'relasi_imam_tarawih', true ),
                 'imam_qiyamul_id' => get_post_meta( $pid, 'relasi_imam_qiyamul', true ),
                 'kajian_list' => is_array($kajian_raw) ? $kajian_raw : array(),
@@ -57,7 +58,12 @@ function jadwal_ramadhan_get_dashboard_html() {
                 <span class="dashicons dashicons-admin-site-alt3"></span>
                 Jadwal Ibadah Ramadhan 1447H
             </h2>
-            <div class="text-sm opacity-90"><?php echo esc_html( $today_display ); ?></div>
+            <div class="text-sm opacity-90 text-right">
+                <?php if ( $today_data && !empty($today_data['tanggal_hijriyah']) ) : ?>
+                    <span class="block font-bold text-lg"><?php echo esc_html( $today_data['tanggal_hijriyah'] ); ?></span>
+                <?php endif; ?>
+                <?php echo esc_html( $today_display ); ?>
+            </div>
         </div>
 
         <!-- Tabs Navigation -->
@@ -167,6 +173,7 @@ function jadwal_ramadhan_get_dashboard_html() {
                             $pid = get_the_ID();
                             $malam = get_post_meta( $pid, 'malam_ke', true );
                             $date = get_post_meta( $pid, 'tanggal_masehi', true );
+                            $hijri = get_post_meta( $pid, 'tanggal_hijriyah', true );
                             
                             $imam_tarawih = get_post_meta( $pid, 'relasi_imam_tarawih', true );
                             $imam_tarawih_name = $imam_tarawih ? get_the_title($imam_tarawih) : '-';
@@ -189,7 +196,10 @@ function jadwal_ramadhan_get_dashboard_html() {
                     ?>
                     <tr class="bg-white border-b hover:bg-gray-50">
                         <td class="px-4 py-3 font-medium text-gray-900 text-center"><?php echo esc_html($malam); ?></td>
-                        <td class="px-4 py-3 whitespace-nowrap"><?php echo esc_html(date_i18n('d M Y', strtotime($date))); ?></td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <span class="block font-bold"><?php echo esc_html($hijri); ?></span>
+                            <span class="text-xs text-gray-500"><?php echo esc_html(date_i18n('d M Y', strtotime($date))); ?></span>
+                        </td>
                         <td class="px-4 py-3"><?php echo esc_html($imam_tarawih_name); ?></td>
                         <td class="px-4 py-3"><?php echo esc_html($imam_qiyamul_name); ?></td>
                         <td class="px-4 py-3"><?php echo $kajian_display; // Allowed html ?></td>
