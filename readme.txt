@@ -1,5 +1,5 @@
 === Jadwal Ramadhan ===
-Contributors: antigravity
+Contributors: nurulishlah
 Tags: ramadhan, jadwal, schedule, mosque, masjid
 Requires at least: 6.0
 Tested up to: 6.7
