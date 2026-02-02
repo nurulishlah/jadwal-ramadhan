@@ -1,9 +1,11 @@
 <?php
 /**
  * Plugin Name: Jadwal Ramadhan
+ * Plugin URI: https://github.com/nurulishlah/jadwal-ramadhan
  * Description: Plugin untuk mengelola dan menampilkan jadwal kegiatan Ramadhan (Imam, Penceramah, dll).
  * Version: 1.0.0
- * Author: Antigravity
+ * Author: Muhamad Ishlah
+ * Author URI: https://github.com/nurulishlah
  * Text Domain: jadwal-ramadhan
  */
 
