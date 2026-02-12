@@ -3,7 +3,7 @@ Contributors: nurulishlah
 Tags: ramadhan, jadwal, schedule, mosque, masjid
 Requires at least: 6.0
 Tested up to: 6.7
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -44,6 +44,11 @@ Currently, the plugin is tailored for Ramadhan (Malam Ke-X logic), but it can be
 3.  Admin Interface - Repeater Fields
 
 == Changelog ==
+
+= 1.0.1 =
+*   Added avatars for Imams and Speakers.
+*   Improved table layout (top align).
+*   Fixed N+1 query performance issue.
 
 = 1.0.0 =
 *   Initial release.
