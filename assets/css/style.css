@@ -317,6 +317,7 @@
 .jadwal-table td {
     padding: 0.75rem 1rem;
     min-width: 160px;
+    vertical-align: top;
     /* Ensure columns don't squash */
 }
 
@@ -355,4 +356,18 @@
 .jadwal-table-date strong {
     display: block;
     color: #000;
+}
+
+.jadwal-tokoh-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.jadwal-tokoh-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #e5e7eb;
 }

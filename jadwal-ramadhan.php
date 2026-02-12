@@ -3,7 +3,7 @@
  * Plugin Name: Jadwal Ramadhan
  * Plugin URI: https://github.com/nurulishlah/jadwal-ramadhan
  * Description: Plugin untuk mengelola dan menampilkan jadwal kegiatan Ramadhan (Imam, Penceramah, dll).
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Muhamad Ishlah
  * Author URI: https://github.com/nurulishlah
  * Text Domain: jadwal-ramadhan
@@ -48,7 +48,7 @@ add_filter( 'template_include', 'jadwal_ramadhan_template_include' );
  */
 function jadwal_ramadhan_enqueue_scripts() {
     // Enqueue Custom Styles
-    wp_enqueue_style( 'jadwal-ramadhan-style', JADWAL_RAMADHAN_URL . 'assets/css/style.css', array(), '1.0.0' );
-    wp_enqueue_script( 'jadwal-ramadhan-tabs', JADWAL_RAMADHAN_URL . 'assets/js/tabs.js', array( 'jquery' ), '1.0.0', true );
+    wp_enqueue_style( 'jadwal-ramadhan-style', JADWAL_RAMADHAN_URL . 'assets/css/style.css', array(), '1.0.1' );
+    wp_enqueue_script( 'jadwal-ramadhan-tabs', JADWAL_RAMADHAN_URL . 'assets/js/tabs.js', array( 'jquery' ), '1.0.1', true );
 }
 add_action( 'wp_enqueue_scripts', 'jadwal_ramadhan_enqueue_scripts' );
